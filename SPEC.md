@@ -5,7 +5,9 @@
 **Plugin name:** `opencode-no-think`  
 **What it does:** Strips thinking/reasoning tags (`<think>...</think>` and `<|message|>...<|message_end|>`) from LLM output before it renders in the CLI. The model still generates thinking content — it just doesn't appear on screen.
 
-**Why it exists:** Reasoning models (MiniMax-M2, DeepSeek-R1, Qwen3, etc.) emit thinking content as XML-like tags in their output. OpenCode's TUI renders this content as plain text, exposing the tags to the user. There is no built-in opencode config option to suppress this. This plugin provides one.
+**Why it exists:** When MiniMax M2.5/M2.7 models are served through SGLANG with `--reasoning-parser minimax-append-think`, the model emits thinking content as `<|message|>...<|message_end|>` tags in its text output. OpenCode's TUI renders these tags as plain text, exposing them to the user. This plugin strips both the MiniMax append-think format and the standard XML `<think>...</think>` format.
+
+**Primary target:** MiniMax M2.5/M2.7 via SGLANG with `--reasoning-parser minimax-append-think`.
 
 **Plugin type:** OpenCode server plugin (exports `server` function, receives `PluginInput`)
 
@@ -21,10 +23,10 @@ The plugin is fully opt-out. Default behaviour is to strip tags. No configuratio
 
 Two tag formats are stripped:
 
-| Format | Start token | End token | Example |
-|--------|-----------|-----------|---------|
-| XML (standard) | `<think>` | `</think>` | `<think>think content</think>` |
-| MiniMax append-think | `<\|message\|>` | `<\|message_end\|>` | `<\|message\|>thinking<\|message_end\|>` |
+| Format | Start token | End token | Example | Trigger |
+|--------|-----------|-----------|---------|---------|
+| XML (standard) | `<think>` | `</think>` | `<think>think content</think>` | Any reasoning model |
+| MiniMax append-think | `<\|message\|>` | `<\|message_end\|>` | `<\|message\|>thinking<\|message_end\|>` | `--reasoning-parser minimax-append-think` in SGLANG |
 
 After stripping, surrounding whitespace is normalized (leading/trailing whitespace from tags is removed).
 
@@ -104,7 +106,7 @@ Configuration is passed as a tuple in `opencode.json`:
 {
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
-    ["opencode-no-think", {
+    ["git+https://github.com/VickY0E/Opencode-SGLANG-Thinktags-fix.git", {
       "enabled": true,
       "showThinkTokens": false,
       "showThinkDuration": false,
@@ -114,7 +116,34 @@ Configuration is passed as a tuple in `opencode.json`:
 }
 ```
 
-### 4.1 Options
+Opencode resolves the plugin from the git URL automatically — no npm install step needed.
+
+### 4.1 Verified SGLANG server command
+
+This plugin was developed against the following SGLANG server invocation:
+
+```bash
+python3 -m sglang.launch_server \
+        --model lukealonso/MiniMax-M2.7-NVFP4 \
+        --served-model-name MiniMax-M2.5 \
+        --host 0.0.0.0 \
+        --port 8000 \
+        --tensor-parallel-size 2 \
+        --quantization modelopt_fp4 \
+        --trust-remote-code \
+        --reasoning-parser minimax-append-think \
+        --tool-call-parser minimax-m2 \
+        --moe-runner-backend flashinfer_cutlass \
+        --attention-backend flashinfer \
+        --kv-cache-dtype fp8_e5m2 \
+        --max-running-requests 16 \
+        --mem-fraction-static 0.94 \
+        --chunked-prefill-size 16384
+```
+
+The `--reasoning-parser minimax-append-think` flag is the trigger for the `<|message|>` tag format.
+
+### 4.2 Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -123,7 +152,7 @@ Configuration is passed as a tuple in `opencode.json`:
 | `showThinkDuration` | `boolean` | `false` | After each assistant turn, print thinking duration to stderr |
 | `tagFormats` | `string[]` | `["xml", "minimax"]` | Which tag formats to strip. Can be a subset. |
 
-### 4.2 Notes
+### 4.3 Notes
 
 - Configuration is optional. The plugin works with zero config.
 - `showThinkTokens` and `showThinkDuration` require the model to include those fields in its response (model-dependent). The plugin reads them from the last assistant message in the session. If not present, the display is silently skipped.
@@ -176,13 +205,16 @@ Uses the same regex patterns to extract thinking blocks, returns their total cha
 ```
 opencode-no-think/
 ├── SPEC.md                     # This file
+├── README.md                   # User-facing documentation
 ├── package.json
 ├── tsconfig.json
-├── .npmignore                  # Exclude tests from npm package
+├── vitest.config.ts
+├── .npmignore
 └── src/
     ├── plugin.ts               # Plugin entry point (server export)
-    ├── types.ts                # Shared TypeScript types
+    ├── types.ts                 # Shared TypeScript types
     └── strip.ts                # Core stripping logic (no opencode deps)
+    └── strip.test.ts           # Unit tests
 ```
 
 ---
@@ -232,19 +264,21 @@ stripThinkTags("complete</think> answer") → "complete</think> answer"
 stripThinkTags("<think>  think </think>   answer") → "answer"
 ```
 
+Run with: `npm test`
+
 ### 9.2 Integration test
 
 Run a prompt that triggers thinking and verify no tags appear:
 
 ```bash
-opencode run "Explain why 13 is prime" --model sglang/MiniMax-M2.5
+opencode run "Explain why 13 is prime" -m sglang/MiniMax-M2.5
 # Expected: clean answer, no <think> or </think> in output
 ```
 
 ### 9.3 Session compaction test
 
 ```bash
-opencode chat "Solve this logic puzzle: ..." --model sglang/MiniMax-M2.5
+opencode chat "Solve this logic puzzle: ..." -m sglang/MiniMax-M2.5
 # Let the session compact (after ~20+ messages)
 # Verify history shows no thinking tags
 ```

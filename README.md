@@ -1,8 +1,20 @@
 # opencode-no-think
 
-Strips thinking/reasoning tags from LLM output before it renders in the CLI.
+Strips thinking/reasoning tags from MiniMax M2.5/M2.7 model output when served via SGLANG, before it renders in the CLI.
 
-Models like MiniMax-M2.5, DeepSeek-R1, and Qwen3 emit thinking content as `<think>...</think>` tags in their text output. OpenCode's TUI renders these as plain text, exposing the tags to the user. This plugin hides them.
+When MiniMax reasoning models are served through SGLANG with the `--reasoning-parser minimax-append-think` flag, the model emits thinking content as `<|message|>...<|message_end|>` XML tags in the text output. OpenCode's TUI renders these tags as plain text, exposing them to the user. This plugin strips them.
+
+## The Problem
+
+Running MiniMax M2.5/M2.7 via SGLANG produces visible thinking tags in the OpenCode TUI:
+
+```
+<think>Let me think about this...
+</think>
+The answer is 42.
+```
+
+This happens specifically because of the `--reasoning-parser minimax-append-think` flag in the SGLANG server command.
 
 ## Install
 
@@ -39,6 +51,31 @@ If you're editing the plugin locally, reference the path instead:
 }
 ```
 
+## Verified SGLANG Setup
+
+This plugin was developed against the following SGLANG server command:
+
+```bash
+python3 -m sglang.launch_server \
+        --model lukealonso/MiniMax-M2.7-NVFP4 \
+        --served-model-name MiniMax-M2.5 \
+        --host 0.0.0.0 \
+        --port 8000 \
+        --tensor-parallel-size 2 \
+        --quantization modelopt_fp4 \
+        --trust-remote-code \
+        --reasoning-parser minimax-append-think \
+        --tool-call-parser minimax-m2 \
+        --moe-runner-backend flashinfer_cutlass \
+        --attention-backend flashinfer \
+        --kv-cache-dtype fp8_e5m2 \
+        --max-running-requests 16 \
+        --mem-fraction-static 0.94 \
+        --chunked-prefill-size 16384
+```
+
+The `--reasoning-parser minimax-append-think` flag is the trigger. Without it, MiniMax M2.5/M2.7 thinking content may still appear as `<<think>...</think>` XML tags and will also be stripped by this plugin.
+
 ## Options
 
 | Option | Type | Default | Description |
@@ -46,7 +83,7 @@ If you're editing the plugin locally, reference the path instead:
 | `enabled` | `boolean` | `true` | Master toggle |
 | `showThinkTokens` | `boolean` | `false` | Print think token count to stderr after each assistant turn |
 | `showThinkDuration` | `boolean` | `false` | Print thinking duration to stderr after each assistant turn |
-| `tagFormats` | `string[]` | `["xml", "minimax"]` | Which tag formats to strip |
+| `tagFormats` | `string[]` | `["xml", "minimax"]` | Which tag formats to strip (`"minimax"` targets `<|message|>` tags) |
 
 ## Develop
 
@@ -67,14 +104,12 @@ The core stripping logic (`src/strip.ts`) has zero OpenCode dependencies — it'
 
 ## Verified patterns
 
-All verified reasoning models emit thinking content as `<think>...</think>` tags in the text output. The plugin strips these universally.
-
-| Model | Format | Notes |
-|-------|--------|-------|
-| MiniMax-M2.5 | XML | Thinking embedded as `<think>...</think>` in content field |
-| DeepSeek-R1, Qwen3 | XML | Thinking embedded as `<think>...</think>` |
-| OpenAI o1/o3 | XML | Thinking embedded as `<think>...</think>` |
-| Gemini 2.0 Flash (thinking) | XML | Thinking embedded as `<think>...</think>` |
+| Model | Format | Trigger |
+|-------|--------|---------|
+| MiniMax-M2.5/M2.7 (SGLANG) | XML + MiniMax append-think | `--reasoning-parser minimax-append-think` |
+| DeepSeek-R1, Qwen3 | XML | None (standard reasoning output) |
+| OpenAI o1/o3 | XML | None (standard reasoning output) |
+| Gemini 2.0 Flash (thinking) | XML | None (standard reasoning output) |
 
 Example input:
 ```
