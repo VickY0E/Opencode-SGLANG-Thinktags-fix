@@ -46,7 +46,22 @@ The core stripping logic (`src/strip.ts`) has zero OpenCode dependencies — it'
 
 ## Verified patterns
 
-| Model | Format | Example |
-|-------|--------|---------|
-| DeepSeek-R1, Qwen3 | XML | `<think>thinking content</think>` |
-| MiniMax-M2.5 | append-think | `<|message|>thinking<|message_end|>` |
+| Model | Format | Open tag | Close tag |
+|-------|--------|----------|-----------|
+| DeepSeek-R1, Qwen3 | XML | `<think>` | `</think>` |
+| OpenAI o1/o3 | XML | `<think>` | `</think>` |
+| Gemini 2.0 Flash (thinking) | XML | `<think>` | `</think>` |
+| MiniMax-M2.5 | append-think | `<\|message\|>` | `<\|message_end\|>` |
+
+Example input:
+```
+<think>Let me think about this...</think>
+The answer is 42.
+```
+
+```
+<|message|>Let me think about this...<|message_end|>
+The answer is 42.
+```
+
+Both render as clean text: `The answer is 42.`
