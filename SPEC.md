@@ -5,9 +5,7 @@
 **Plugin name:** `opencode-no-think`  
 **What it does:** Strips thinking/reasoning tags (`<think>...</think>` and `<|message|>...<|message_end|>`) from LLM output before it renders in the CLI. The model still generates thinking content — it just doesn't appear on screen.
 
-**Why it exists:** When MiniMax M2.5/M2.7 models are served through SGLANG with `--reasoning-parser minimax-append-think`, the model emits thinking content as `<|message|>...<|message_end|>` tags in its text output. OpenCode's TUI renders these tags as plain text, exposing them to the user. This plugin strips both the MiniMax append-think format and the standard XML `<think>...</think>` format.
-
-**Primary target:** MiniMax M2.5/M2.7 via SGLANG with `--reasoning-parser minimax-append-think`.
+**Why it exists:** When MiniMax M2.5/M2.7 models are served through SGLANG, the model emits thinking content as `<think>...</think>` XML tags in its text output. OpenCode's TUI renders these tags as plain text, exposing them to the user. This plugin strips both the standard XML format and, when `--reasoning-parser minimax-append-think` is enabled, the additional `<|message|>...<|message_end|>` format.
 
 **Plugin type:** OpenCode server plugin (exports `server` function, receives `PluginInput`)
 
@@ -25,7 +23,7 @@ Two tag formats are stripped:
 
 | Format | Start token | End token | Example | Trigger |
 |--------|-----------|-----------|---------|---------|
-| XML (standard) | `<think>` | `</think>` | `<think>think content</think>` | Any reasoning model |
+| XML (standard) | `<think>` | `</think>` | `<think>think content</think>` | Always (MiniMax M2.5/M2.7 via SGLANG) |
 | MiniMax append-think | `<\|message\|>` | `<\|message_end\|>` | `<\|message\|>thinking<\|message_end\|>` | `--reasoning-parser minimax-append-think` in SGLANG |
 
 After stripping, surrounding whitespace is normalized (leading/trailing whitespace from tags is removed).
