@@ -7,6 +7,9 @@
   "exports": {
     ".": "./src/plugin.ts"
   },
+  "files": [
+    "src/"
+  ],
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",

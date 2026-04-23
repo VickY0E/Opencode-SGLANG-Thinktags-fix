@@ -6,13 +6,34 @@ Models like MiniMax-M2.5, DeepSeek-R1, and Qwen3 emit thinking content as `<thin
 
 ## Install
 
-Add to your `opencode.json` plugin config:
+Add to your opencode config (at `~/.config/opencode/opencode.json` or your workspace config):
 
 ```json
 {
   "plugin": [
-    ["opencode-no-think", {
-      "enabled": true
+    "superpowers@git+https://github.com/obra/superpowers.git",
+    ["git+https://github.com/VickY0E/Opencode-SGLANG-Thinktags-fix.git", {
+      "enabled": true,
+      "showThinkTokens": false,
+      "showThinkDuration": false,
+      "tagFormats": ["xml", "minimax"]
+    }]
+  ]
+}
+```
+
+Opencode resolves the plugin from the git URL automatically — no npm install step needed.
+
+### Local development
+
+If you're editing the plugin locally, reference the path instead:
+
+```json
+{
+  "plugin": [
+    ["/path/to/Opencode-SGLANG-Thinktags-fix", {
+      "enabled": true,
+      "tagFormats": ["xml", "minimax"]
     }]
   ]
 }
@@ -25,7 +46,7 @@ Add to your `opencode.json` plugin config:
 | `enabled` | `boolean` | `true` | Master toggle |
 | `showThinkTokens` | `boolean` | `false` | Print think token count to stderr after each assistant turn |
 | `showThinkDuration` | `boolean` | `false` | Print thinking duration to stderr after each assistant turn |
-| `tagFormats` | `string[]` | `["xml", "minimax"]` | Which tag formats to strip (`"minimax"` is a no-op for now) |
+| `tagFormats` | `string[]` | `["xml", "minimax"]` | Which tag formats to strip |
 
 ## Develop
 
