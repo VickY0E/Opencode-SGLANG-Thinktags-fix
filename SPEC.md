@@ -285,7 +285,7 @@ opencode chat "Solve this logic puzzle: ..." -m sglang/MiniMax-M2.5
 
 ## 10. Open questions / future work
 
-1. **Server-side fix (separate issue):** The root cause is that `@ai-sdk/openai-compatible` treats MiniMax reasoning as plain text (`reasoning_content: null`). A proper fix would be upstream in the SDK or in SGLANG's `MiniMaxAppendThinkDetector`. This plugin is a display-layer workaround only.
+1. **Server-side fix (separate issue):** The root cause is that SGLANG emits MiniMax thinking content as `<think>...</think>` tags embedded in the `content` field, while `reasoning_content` remains null. The SDK reads `content` correctly — the tags simply aren't suppressed before TUI rendering. A proper fix would be in SGLANG's response format (not emitting tags in `content`) or in opencode's TUI layer. This plugin is a display-layer workaround only.
 
 2. **Per-model configuration:** Currently the plugin applies universally. If a user has both reasoning and non-reasoning models, tags from non-reasoning models would trigger unnecessary stripping. Hooks don't expose the model ID at text-complete time, so per-model filtering isn't possible with the current API.
 
