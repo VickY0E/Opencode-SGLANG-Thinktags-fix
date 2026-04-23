@@ -19,12 +19,11 @@ The plugin is fully opt-out. Default behaviour is to strip tags. No configuratio
 
 ### 2.2 Stripped content
 
-Two tag formats are stripped:
+One tag format is stripped:
 
 | Format | Start token | End token | Example | Trigger |
 |--------|-----------|-----------|---------|---------|
-| XML (standard) | `<think>` | `</think>` | `<think>think content</think>` | Always (MiniMax M2.5/M2.7 via SGLANG) |
-| MiniMax append-think | `<\|message\|>` | `<\|message_end\|>` | `<\|message\|>thinking<\|message_end\|>` | `--reasoning-parser minimax-append-think` in SGLANG |
+| XML | `<think>` | `</think>` | `<think>think content</think>` | Always (MiniMax M2.5/M2.7 via SGLANG, no special flag needed) |
 
 After stripping, surrounding whitespace is normalized (leading/trailing whitespace from tags is removed).
 
@@ -139,7 +138,7 @@ python3 -m sglang.launch_server \
         --chunked-prefill-size 16384
 ```
 
-The `--reasoning-parser minimax-append-think` flag is the trigger for the `<|message|>` tag format.
+The `--reasoning-parser minimax-append-think` flag was part of the verified setup but does not control whether XML thinking tags appear.
 
 ### 4.2 Options
 
@@ -148,7 +147,7 @@ The `--reasoning-parser minimax-append-think` flag is the trigger for the `<|mes
 | `enabled` | `boolean` | `true` | Master toggle. `false` installs no hooks. |
 | `showThinkTokens` | `boolean` | `false` | After each assistant turn, print thinking token count to stderr |
 | `showThinkDuration` | `boolean` | `false` | After each assistant turn, print thinking duration to stderr |
-| `tagFormats` | `string[]` | `["xml", "minimax"]` | Which tag formats to strip. Can be a subset. |
+| `tagFormats` | `string[]` | `["xml"]` | Which tag formats to strip. Can be a subset. |
 
 ### 4.3 Notes
 

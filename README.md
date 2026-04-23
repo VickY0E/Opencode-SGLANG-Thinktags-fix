@@ -2,7 +2,7 @@
 
 Strips thinking/reasoning tags from MiniMax M2.5/M2.7 model output when served via SGLANG, before it renders in the CLI.
 
-When MiniMax M2.5/M2.7 are served through SGLANG, the model emits thinking content as `<think>...</think>` XML tags in the text output. OpenCode's TUI renders these tags as plain text, exposing them to the user. This plugin strips them. When `--reasoning-parser minimax-append-think` is enabled, it additionally emits `<|message|>...<|message_end|>` tags — both formats are stripped.
+When MiniMax M2.5/M2.7 are served through SGLANG, the model emits thinking content as `<think>...</think>` XML tags in the text output. OpenCode's TUI renders these tags as plain text, exposing them to the user. This plugin strips them.
 
 ## The Problem
 
@@ -14,7 +14,7 @@ Running MiniMax M2.5/M2.7 via SGLANG produces visible thinking tags in the OpenC
 The answer is 42.
 ```
 
-This happens specifically because of the `--reasoning-parser minimax-append-think` flag in the SGLANG server command.
+The thinking tags appear regardless of `--reasoning-parser minimax-append-think` — this flag is included in the verified setup but the XML tags are emitted either way.
 
 ## Install
 
@@ -72,7 +72,7 @@ python3 -m sglang.launch_server \
         --chunked-prefill-size 16384
 ```
 
-The `--reasoning-parser minimax-append-think` flag is the trigger. Without it, MiniMax M2.5/M2.7 thinking content may still appear as `<<think>...</think>` XML tags and will also be stripped by this plugin.
+The `--reasoning-parser minimax-append-think` flag was part of the verified setup but does not control whether XML thinking tags appear.
 
 ## Options
 
@@ -81,7 +81,7 @@ The `--reasoning-parser minimax-append-think` flag is the trigger. Without it, M
 | `enabled` | `boolean` | `true` | Master toggle |
 | `showThinkTokens` | `boolean` | `false` | Print think token count to stderr after each assistant turn |
 | `showThinkDuration` | `boolean` | `false` | Print thinking duration to stderr after each assistant turn |
-| `tagFormats` | `string[]` | `["xml", "minimax"]` | Which tag formats to strip (`"minimax"` targets `<|message|>` tags) |
+| `tagFormats` | `string[]` | `["xml"]` | Which tag formats to strip |
 
 ## Develop
 
@@ -104,7 +104,7 @@ The core stripping logic (`src/strip.ts`) has zero OpenCode dependencies — it'
 
 | Model | Format | Trigger |
 |-------|--------|---------|
-| MiniMax-M2.5/M2.7 (SGLANG) | XML + MiniMax append-think | `--reasoning-parser minimax-append-think` |
+| MiniMax-M2.5/M2.7 (SGLANG) | XML | Always (no special flag needed) |
 | DeepSeek-R1, Qwen3 | XML | None (standard reasoning output) |
 | OpenAI o1/o3 | XML | None (standard reasoning output) |
 | Gemini 2.0 Flash (thinking) | XML | None (standard reasoning output) |
