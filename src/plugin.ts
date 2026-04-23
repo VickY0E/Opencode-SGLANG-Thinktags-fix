@@ -22,9 +22,7 @@ export async function server(
 
   return {
     'experimental.text.complete': async (_inp, out) => {
-      console.error('[no-think] text.complete hook firing, original length:', out.text.length);
       out.text = stripThinkTags(out.text, opts.tagFormats);
-      console.error('[no-think] text.complete done, stripped length:', out.text.length);
     },
 
     'experimental.chat.messages.transform': async (_inp, out) => {
@@ -32,11 +30,7 @@ export async function server(
         if (msg.info?.role !== 'assistant') continue;
         for (const part of msg.parts ?? []) {
           if (part.type === 'text' && typeof part.text === 'string') {
-            const original = part.text;
             part.text = stripThinkTags(part.text, opts.tagFormats);
-            if (original !== part.text) {
-              console.error('[no-think] messages.transform stripped tags from part');
-            }
           }
         }
       }
