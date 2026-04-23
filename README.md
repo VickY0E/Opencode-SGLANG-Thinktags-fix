@@ -2,7 +2,7 @@
 
 Strips thinking/reasoning tags from MiniMax M2.5/M2.7 model output when served via SGLANG, before it renders in the CLI.
 
-When MiniMax reasoning models are served through SGLANG with the `--reasoning-parser minimax-append-think` flag, the model emits thinking content as `<|message|>...<|message_end|>` XML tags in the text output. OpenCode's TUI renders these tags as plain text, exposing them to the user. This plugin strips them.
+When MiniMax M2.5/M2.7 are served through SGLANG, the model emits thinking content as `<think>...</think>` XML tags in the text output. OpenCode's TUI renders these tags as plain text, exposing them to the user. This plugin strips them. When `--reasoning-parser minimax-append-think` is enabled, it additionally emits `<|message|>...<|message_end|>` tags — both formats are stripped.
 
 ## The Problem
 
