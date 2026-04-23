@@ -106,7 +106,7 @@ Configuration is passed as a tuple in `opencode.json`:
 {
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
-    ["git+https://github.com/VickY0E/Opencode-SGLANG-Thinktags-fix.git", {
+    ["/path/to/Opencode-SGLANG-Thinktags-fix", {
       "enabled": true,
       "showThinkTokens": false,
       "showThinkDuration": false,
@@ -116,7 +116,7 @@ Configuration is passed as a tuple in `opencode.json`:
 }
 ```
 
-Opencode resolves the plugin from the git URL automatically — no npm install step needed.
+Opencode resolves plugins from its local package cache, which requires a filesystem path. Git URLs and npm module names are not currently supported as plugin specifiers.
 
 ### 4.1 Verified SGLANG server command
 
