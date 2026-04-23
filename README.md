@@ -2,7 +2,7 @@
 
 Strips thinking/reasoning tags from LLM output before it renders in the CLI.
 
-Models like MiniMax-M2.5, DeepSeek-R1, and Qwen3 emit thinking content as `<think>...</think>` or `<|message|>...<|message_end|>` tags. OpenCode's TUI renders these as plain text, exposing the tags to the user. This plugin hides them.
+Models like MiniMax-M2.5, DeepSeek-R1, and Qwen3 emit thinking content as `<think>...</think>` tags in their text output. OpenCode's TUI renders these as plain text, exposing the tags to the user. This plugin hides them.
 
 ## Install
 
@@ -25,7 +25,7 @@ Add to your `opencode.json` plugin config:
 | `enabled` | `boolean` | `true` | Master toggle |
 | `showThinkTokens` | `boolean` | `false` | Print think token count to stderr after each assistant turn |
 | `showThinkDuration` | `boolean` | `false` | Print thinking duration to stderr after each assistant turn |
-| `tagFormats` | `string[]` | `["xml", "minimax"]` | Which tag formats to strip |
+| `tagFormats` | `string[]` | `["xml", "minimax"]` | Which tag formats to strip (`"minimax"` is a no-op for now) |
 
 ## Develop
 
