@@ -46,12 +46,14 @@ The core stripping logic (`src/strip.ts`) has zero OpenCode dependencies — it'
 
 ## Verified patterns
 
-| Model | Format | Open tag | Close tag |
-|-------|--------|----------|-----------|
-| DeepSeek-R1, Qwen3 | XML | `<think>` | `</think>` |
-| OpenAI o1/o3 | XML | `<think>` | `</think>` |
-| Gemini 2.0 Flash (thinking) | XML | `<think>` | `</think>` |
-| MiniMax-M2.5 | append-think | `<\|message\|>` | `<\|message_end\|>` |
+All verified reasoning models emit thinking content as `<think>...</think>` tags in the text output. The plugin strips these universally.
+
+| Model | Format | Notes |
+|-------|--------|-------|
+| MiniMax-M2.5 | XML | Thinking embedded as `<think>...</think>` in content field |
+| DeepSeek-R1, Qwen3 | XML | Thinking embedded as `<think>...</think>` |
+| OpenAI o1/o3 | XML | Thinking embedded as `<think>...</think>` |
+| Gemini 2.0 Flash (thinking) | XML | Thinking embedded as `<think>...</think>` |
 
 Example input:
 ```
@@ -59,9 +61,4 @@ Example input:
 The answer is 42.
 ```
 
-```
-<|message|>Let me think about this...<|message_end|>
-The answer is 42.
-```
-
-Both render as clean text: `The answer is 42.`
+Renders as: `The answer is 42.`
