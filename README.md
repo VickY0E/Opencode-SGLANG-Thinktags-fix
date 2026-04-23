@@ -24,7 +24,7 @@ Add to your opencode config (at `~/.config/opencode/opencode.json` or your works
 {
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
-    ["git+https://github.com/VickY0E/Opencode-SGLANG-Thinktags-fix.git", {
+    ["/path/to/Opencode-SGLANG-Thinktags-fix", {
       "enabled": true,
       "showThinkTokens": false,
       "showThinkDuration": false,
@@ -34,22 +34,20 @@ Add to your opencode config (at `~/.config/opencode/opencode.json` or your works
 }
 ```
 
-Opencode resolves the plugin from the git URL automatically — no npm install step needed.
+> **Note:** Opencode resolves plugins via its local package cache, which requires a filesystem path. Git URLs and npm module names are not currently supported as plugin specifiers — use the absolute path to the cloned repo.
 
-### Local development
+### Setup steps
 
-If you're editing the plugin locally, reference the path instead:
+```bash
+# 1. Clone the repo somewhere permanent
+git clone https://github.com/VickY0E/Opencode-SGLANG-Thinktags-fix.git ~/Opencode-SGLANG-Thinktags-fix
 
-```json
-{
-  "plugin": [
-    ["/path/to/Opencode-SGLANG-Thinktags-fix", {
-      "enabled": true,
-      "tagFormats": ["xml", "minimax"]
-    }]
-  ]
-}
+# 2. Add to ~/.config/opencode/opencode.json (see config above)
+
+# 3. Restart opencode
 ```
+
+After restart, thinking tags will be stripped from MiniMax M2.5/M2.7 SGLANG output in both the CLI and desktop app.
 
 ## Verified SGLANG Setup
 
