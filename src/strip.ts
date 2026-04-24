@@ -1,3 +1,6 @@
+// Copyright 2025 VickY0E
+// Licensed under the Apache License, Version 2.0
+
 const XML_PATTERN = new RegExp('<think>[\\s\\S]*</think>\\s*', 'g');
 
 const MINIMAX_PATTERN = new RegExp('<\\|message\\|>[\\s\\S]*?<\\|message_end\\|>\\s*', 'g');

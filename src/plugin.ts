@@ -1,3 +1,5 @@
+// Copyright 2025 VickY0E
+// Licensed under the Apache License, Version 2.0
 import type { PluginInput, Hooks } from '@opencode-ai/plugin';
 import type { PluginOptions } from './types.js';
 import { stripThinkTags, countThinkTokens } from './strip.js';

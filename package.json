@@ -2,6 +2,7 @@
   "name": "opencode-plugin-no-think",
   "version": "0.1.0",
   "description": "Strip thinking/reasoning tags from LLM output in OpenCode",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "src/plugin.ts",
   "exports": {
